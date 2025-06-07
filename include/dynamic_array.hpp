@@ -1,30 +1,34 @@
 #ifndef DYNAMIC_ARRAY_HPP
 #define DYNAMIC_ARRAY_HPP
 
+#include <algorithm>
 #include <cstddef>
+#include <initializer_list>
 #include <stdexcept>
 
 template <typename T> struct DynamicArray {
 private:
   T *data;
   size_t capacity;
-  size_t length;
+  size_t _size;
+
+  inline void reallocate(size_t new_capacity) {}
 
 public:
-  // Default Constructor
-  DynamicArray() : data(nullptr), capacity(0), length(0) {}
-  // Fill Constructor
+  // (1) Default Constructor
+  DynamicArray() : data(nullptr), capacity(0), _size(0) {}
+  // (2) Fill Constructor
   DynamicArray(size_t n, const T &value = T())
-      : data(new T[n]), capacity(n), length(n) {
+      : data(new T[n]), capacity(n), _size(n) {
     for (size_t i = 0; i < n; ++i) {
       data[i] = value;
     }
   }
-  // Copy Constructor
+  // (3) Copy Constructor
   DynamicArray(const DynamicArray &other)
       : data(new T[other.capacity]), capacity(other.capacity),
-        length(other.length) {
-    for (size_t i = 0; i < other.length; ++i) {
+        _size(other._size) {
+    for (size_t i = 0; i < other._size; ++i) {
       data[i] = other.data[i];
     }
   }
@@ -34,25 +38,25 @@ public:
 
   // Classic operators on dynamic arrays
   void push_back(const T &value) {
-    if (length == capacity) {
+    if (_size == capacity) {
       T *new_data = new T[capacity == 0 ? 1 : capacity * 2];
-      for (size_t i = 0; i < length; ++i) {
+      for (size_t i = 0; i < _size; ++i) {
         new_data[i] = data[i];
       }
       delete[] data;
       data = new_data;
     }
-    data[length] = value;
-    length++;
+    data[_size] = value;
+    _size++;
   }
 
   void pop_back(void) {
-    data[length - 1] = T();
-    length--;
+    data[_size - 1] = T();
+    _size--;
 
-    if (length == capacity / 2) {
+    if (_size == capacity / 2) {
       T *new_data = new T[capacity / 2];
-      for (size_t i = 0; i < length; ++i) {
+      for (size_t i = 0; i < _size; ++i) {
         new_data[i] = data[i];
       }
       delete[] data;
@@ -62,7 +66,7 @@ public:
   }
 
   T at(size_t index) const {
-    if (index < length && index >= 0) {
+    if (index < _size && index >= 0) {
       return data[index];
     } else {
       throw std::out_of_range("Index out of range");
@@ -70,26 +74,26 @@ public:
   }
 
   bool empty(void) const {
-    if (length == 0) {
+    if (_size == 0) {
       return true;
     } else {
       return false;
     }
   }
 
-  size_t size(void) const { return length; }
+  size_t size(void) const { return _size; }
 
   T *begin(void) { return data; }
 
-  T *end(void) { return data + length; }
+  T *end(void) { return data + _size; }
 
   const T *cbegin(void) const { return data; }
 
-  const T *cend(void) const { return data + length; }
+  const T *cend(void) const { return data + _size; }
 
   // overloaded operators
   T operator[](size_t index) const {
-    if (index < length) {
+    if (index < _size) {
       return data[index];
     } else {
       throw std::out_of_range("Index out of range");

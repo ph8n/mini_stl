@@ -11,5 +11,10 @@ int main() {
   for (int i = 0; i < arr.size(); ++i) {
     std::cout << arr[i] << " ";
   }
+
+  std::cout << arr.size() << std::endl;
+  std::cout << arr.empty() << std::endl;
+  std::cout << arr.begin() << std::endl;
+  std::cout << arr.end() << std::endl;
   return 0;
 }
