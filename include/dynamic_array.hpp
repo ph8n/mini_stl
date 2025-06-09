@@ -12,8 +12,6 @@ private:
   size_t capacity;
   size_t _size;
 
-  inline void reallocate(size_t new_capacity) {}
-
 public:
   // (1) Default Constructor
   DynamicArray() : data(nullptr), capacity(0), _size(0) {}
@@ -81,7 +79,7 @@ public:
     }
   }
 
-  size_t size(void) const { return _size; }
+  size_t size(void) const { return size; }
 
   T *begin(void) { return data; }
 
