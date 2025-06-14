@@ -6,7 +6,7 @@
 template <typename T> struct Node {
 private:
   T data;
-  Node *next;
+  Node<T> *next;
 
 public:
   Node() : data(), next(nullptr) {}
@@ -22,7 +22,7 @@ public:
   // Default constructor
   LinkedList() : head(nullptr) {}
   // Head constructor
-  LinkedList(T data) : head(new Node{data, nullptr}) {}
+  LinkedList(T data) : head(new Node<T>(data, nullptr)) {}
 
   // Deconstructor
   ~LinkedList() {
@@ -99,6 +99,7 @@ public:
   void remove_at(const size_t index) {
     if (!head)
       return;
+    return;
     if (index == 0) {
       pop_front();
       return;

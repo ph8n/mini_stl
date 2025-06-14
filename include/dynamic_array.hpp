@@ -1,73 +1,99 @@
 #ifndef DYNAMIC_ARRAY_HPP
 #define DYNAMIC_ARRAY_HPP
 
-#include <algorithm>
 #include <cstddef>
-#include <initializer_list>
-#include <stdexcept>
+#include <iterator>
 
 template <typename T> struct DynamicArray {
 private:
-  T *data;
-  size_t capacity;
+  T *_data;
+  size_t _capacity;
   size_t _size;
 
 public:
   // (1) Default Constructor
-  DynamicArray() : data(nullptr), capacity(0), _size(0) {}
+  DynamicArray() : _data(nullptr), _capacity(0), _size(0) {}
   // (2) Fill Constructor
   DynamicArray(size_t n, const T &value = T())
-      : data(new T[n]), capacity(n), _size(n) {
+      : _data(new T[n]), _capacity(n), _size(n) {
     for (size_t i = 0; i < n; ++i) {
-      data[i] = value;
+      _data[i] = value;
     }
   }
   // (3) Copy Constructor
   DynamicArray(const DynamicArray &other)
-      : data(new T[other.capacity]), capacity(other.capacity),
+      : _data(new T[other._capacity]), _capacity(other._capacity),
         _size(other._size) {
     for (size_t i = 0; i < other._size; ++i) {
-      data[i] = other.data[i];
+      _data[i] = other._data[i];
     }
   }
 
   // Deconstructor
-  ~DynamicArray() { delete[] data; }
+  ~DynamicArray() { delete[] _data; }
+
+  // Iterator
+  struct Iterator {
+  public:
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = T;
+    using pointer = T *;
+    using reference = T &;
+
+    Iterator(T *ptr) : current(ptr) {}
+
+    reference operator*(void) const { return *current; }
+    pointer operator->(void) const { return current; }
+
+    Iterator &operator++(void) {
+      ++current;
+      return *this;
+    }
+
+    Iterator operator++(int) {
+      Iterator temp = *this;
+      ++current;
+      return temp;
+    }
+
+    friend bool operator==(const Iterator &a, const Iterator &b) {
+      return a.current == b.current;
+    }
+
+    friend bool operator!=(const Iterator &a, const Iterator &b) {
+      return a.current != b.current;
+    }
+
+  private:
+    pointer current;
+  };
 
   // Classic operators on dynamic arrays
   void push_back(const T &value) {
-    if (_size == capacity) {
-      T *new_data = new T[capacity == 0 ? 1 : capacity * 2];
+    if (_size == _capacity) {
+      T *new_data = new T[_capacity == 0 ? 1 : _capacity * 2];
       for (size_t i = 0; i < _size; ++i) {
-        new_data[i] = data[i];
+        new_data[i] = _data[i];
       }
-      delete[] data;
-      data = new_data;
+      delete[] _data;
+      _data = new_data;
     }
-    data[_size] = value;
+    _data[_size] = value;
     _size++;
   }
 
   void pop_back(void) {
-    data[_size - 1] = T();
+    _data[_size - 1] = T();
     _size--;
 
-    if (_size == capacity / 2) {
-      T *new_data = new T[capacity / 2];
+    if (_size == _capacity / 2) {
+      T *new_data = new T[_capacity / 2];
       for (size_t i = 0; i < _size; ++i) {
-        new_data[i] = data[i];
+        new_data[i] = _data[i];
       }
-      delete[] data;
-      data = new_data;
-      capacity /= 2;
-    }
-  }
-
-  T at(size_t index) const {
-    if (index < _size && index >= 0) {
-      return data[index];
-    } else {
-      throw std::out_of_range("Index out of range");
+      delete[] _data;
+      _data = new_data;
+      _capacity /= 2;
     }
   }
 
@@ -79,24 +105,24 @@ public:
     }
   }
 
-  size_t size(void) const { return size; }
+  size_t size(void) const { return _size; }
 
-  T *begin(void) { return data; }
+  T &operator[](size_t index) { return _data[index]; }
 
-  T *end(void) { return data + _size; }
-
-  const T *cbegin(void) const { return data; }
-
-  const T *cend(void) const { return data + _size; }
-
-  // overloaded operators
-  T operator[](size_t index) const {
-    if (index < _size) {
-      return data[index];
-    } else {
-      throw std::out_of_range("Index out of range");
+  DynamicArray &operator=(DynamicArray &&other) noexcept {
+    if (this != &other) {
+      delete[] _data;
+      _data = other._data;
+      _capacity = other._capacity;
+      _size = other._size;
+      other._data = nullptr;
+      other._capacity = 0;
+      other._size = 0;
     }
   }
+
+  Iterator begin() { return Iterator(_data); }
+  Iterator end() { return Iterator(_data + _size); }
 };
 
 #endif
