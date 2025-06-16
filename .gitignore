@@ -9,6 +9,7 @@ bin/
 out/
 debug/
 release/
+.cache/
 
 guide.md
 
