@@ -49,10 +49,20 @@ public:
       ++current;
       return *this;
     }
+    Iterator &operator--(void) {
+      --current;
+      return *this;
+    }
 
     Iterator operator++(int) {
       Iterator temp = *this;
       ++current;
+      return temp;
+    }
+
+    Iterator operator--(int) {
+      Iterator temp = *this;
+      --current;
       return temp;
     }
 
