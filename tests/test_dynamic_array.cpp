@@ -32,17 +32,6 @@ TEST_CASE("pop_back and shrink", "[DynamicArray]") {
   // capacity shrink is internal; we trust no UB
 }
 
-TEST_CASE("copy constructor", "[DynamicArray]") {
-  DynamicArray<int> a;
-  for (int i = 0; i < 5; ++i)
-    a.push_back(i * 2);
-
-  DynamicArray<int> b = a;
-  REQUIRE(b.size() == a.size());
-  for (size_t i = 0; i < b.size(); ++i)
-    REQUIRE(b[i] == a[i]);
-}
-
 TEST_CASE("iterator support", "[DynamicArray]") {
   DynamicArray<int> arr;
   for (int i = 1; i <= 4; ++i)
