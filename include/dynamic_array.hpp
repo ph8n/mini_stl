@@ -91,10 +91,51 @@ public:
     clear();
     ::operator delete(_data);
   }
-  DynamicArray(const DynamicArray &other);
-  DynamicArray(DynamicArray &&other) noexcept;
-  DynamicArray &operator=(DynamicArray &&other) noexcept;
-  DynamicArray &operator=(const DynamicArray &other);
+  DynamicArray(const DynamicArray &other)
+      : _data(nullptr), _size(0), _capacity(0) {
+    if (other.empty())
+      return;
+    _data = static_cast<pointer>(::operator new(other._capacity * sizeof(T)));
+    for (size_type i = 0; i < other._size; ++i) {
+      new (&_data[i]) T(other._data[i]);
+    }
+    _capacity = other._capacity;
+    _size = other._size;
+  }
+  DynamicArray(DynamicArray &&other) noexcept
+      : _data(other._data), _capacity(other._capacity), _size(other._size) {
+    other._data = nullptr;
+    other._size = 0;
+    other._capacity = 0;
+  }
+  DynamicArray &operator=(DynamicArray &&other) noexcept {
+    if (this != &other) {
+      clear();
+      ::operator delete(_data);
+      _data = other._data;
+      _size = other._size;
+      _capacity = other._capacity;
+      other._data = nullptr;
+      other._size = 0;
+      other._capacity = 0;
+    }
+    return *this;
+  }
+  DynamicArray &operator=(const DynamicArray &other) {
+    if (this != &other) {
+      clear();
+      if (_capacity < other._size) {
+        ::operator delete(_data);
+        _data = static_cast<pointer>(::operator new(other._capacity * sizeof(T)));
+        _capacity = other._capacity;
+      }
+      for (size_type i = 0; i < other._size; ++i) {
+        new (&_data[i]) T(other._data[i]);
+      }
+      _size = other._size;
+    }
+    return *this;
+  }
 
   // iterators
   iterator begin() { return _data; }
@@ -120,14 +161,12 @@ public:
   reference at(size_type index) {
     if (index >= _size || index < 0) {
       throw std::out_of_range("Out of bounds");
-      return;
     }
     return _data[index];
   }
   const_reference at(size_type index) const {
     if (index >= _size || index < 0) {
       throw std::out_of_range("Out of bounds");
-      return;
     }
     return _data[index];
   }
